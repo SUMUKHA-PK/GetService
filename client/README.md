@@ -1,0 +1,1 @@
+Client for the GetService application (written in JavaScript)
