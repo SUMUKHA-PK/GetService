@@ -1,1 +1,0 @@
-The GetService Server. (Golang)
