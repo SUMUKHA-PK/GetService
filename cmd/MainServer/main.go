@@ -8,10 +8,7 @@ import (
 )
 
 func main() {
-
 	r := mux.NewRouter()
-
 	*r = routing.SetupRouting(*r)
-
 	server.Server(r, "52525")
 }
