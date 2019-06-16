@@ -10,5 +10,5 @@ RUN apk add git
 
 RUN go build -v ./cmd/...
 
-EXPOSE 3000
+EXPOSE 52525
 
