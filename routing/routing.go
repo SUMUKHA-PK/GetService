@@ -10,9 +10,6 @@ import (
 func SetupRouting(r mux.Router) mux.Router {
 	r.HandleFunc("/", HomeRouter).Methods(http.MethodGet, http.MethodOptions)
 	r.HandleFunc("/pasteData", PasteData).Methods(http.MethodPost, http.MethodOptions)
-	// r.HandleFunc("/",ReadPaste)
-	// r.PathPrefix("/").Handler(ReadPaste(http.Handler(HomeRouter))).ServeHTTP
-	// r.HandleFunc("/storePassword", StorePassword).Methods(http.MethodPost, http.MethodOptions)
-	// r.HandleFunc("/getPassword", GetPassword).Methods(http.MethodPost, http.MethodOptions)
+	r.HandleFunc("/p/{id:[0-9a-zA-Z]+}", ReadPaste)
 	return r
 }

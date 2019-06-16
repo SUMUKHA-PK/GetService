@@ -9,5 +9,5 @@ type PasteRequest struct {
 
 // PasteResponse is the response for a paste
 type PasteResponse struct {
-	URL string
+	URL string `json: url`
 }

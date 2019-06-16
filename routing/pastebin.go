@@ -2,6 +2,7 @@ package routing
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -16,7 +17,7 @@ import (
 	Util "github.com/SUMUKHA-PK/GetService/util"
 )
 
-// PasteData handles /pasteData
+// PasteData handles /pasteData write API
 func PasteData(w http.ResponseWriter, r *http.Request) {
 
 	// get the data from the request
@@ -46,7 +47,7 @@ func PasteData(w http.ResponseWriter, r *http.Request) {
 
 	// provide an option for custom strings
 	var hashedString string
-	duplicate, err := CheckDuplicateURL(newReq.CustomURL)
+	duplicate, err := CheckDuplicateURL(Util.SanitizeURL(newReq.CustomURL))
 	if err != nil {
 		log.Printf("DB error in routing/pastebin.go")
 		log.Println(err)
@@ -74,7 +75,7 @@ func PasteData(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// the data is sent back to the WebServer as a JSON
-	URL := Util.PasteResponse{hashedString}
+	URL := Util.PasteResponse{"/p/" + hashedString}
 	outJSON, err := json.Marshal(URL)
 	if err != nil {
 		log.Printf("Can't Marshall to JSON in routing/pastebin.go")
@@ -87,9 +88,10 @@ func PasteData(w http.ResponseWriter, r *http.Request) {
 	w.Write(outJSON)
 }
 
-// func ReadPaste(w http.ResponseWriter, r *http.Request) {
-
-// }
+// ReadPaste handles the /p/{id:[0-9a-zA-Z]+} Read API
+func ReadPaste(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(r.URL.Path)
+}
 
 // CheckDuplicateURL returns whether the current URL is taken or not
 func CheckDuplicateURL(url string) (bool, error) {
