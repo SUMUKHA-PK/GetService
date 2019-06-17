@@ -1,7 +1,6 @@
 package database
 
 import (
-	"log"
 	"time"
 
 	"github.com/SUMUKHA-PK/GetService/util"
@@ -22,11 +21,37 @@ func StorePasteData(hashedString string, data util.PasteRequest) error {
 		data.PasteContent + "'" +
 		")"
 
-	log.Println(query)
 	_, err = dbConn.Exec(query)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+// GetPasteData gets the pasted data from the DB
+func GetPasteData(url string) (string, error) {
+
+	dbConn, err := CreateTables()
+	if err != nil {
+		return "", err
+	}
+
+	data := make([]util.PasteData, 0)
+	query := "SELECT * FROM pastes WHERE pastepath = '" + url + "'"
+
+	rows, err := dbConn.Query(query)
+	defer rows.Close()
+	for rows.Next() {
+		var tempData util.PasteData
+		if err = rows.Scan(&tempData.ExpLength, &tempData.CreatedTime, &tempData.PastePath, &tempData.Data); err != nil {
+			return "", err
+		}
+		data = append(data, tempData)
+	}
+	if err := rows.Err(); err != nil {
+		return "", err
+	}
+
+	return data[0].Data, nil
 }

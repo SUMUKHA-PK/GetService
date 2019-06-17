@@ -2,10 +2,10 @@ package routing
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 	"unsafe"
 
@@ -90,7 +90,28 @@ func PasteData(w http.ResponseWriter, r *http.Request) {
 
 // ReadPaste handles the /p/{id:[0-9a-zA-Z]+} Read API
 func ReadPaste(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r.URL.Path)
+	url := r.URL.Path
+	url = strings.ReplaceAll(url, "/p/", "")
+	pasteData, err := database.GetPasteData(url)
+
+	if err != nil {
+		log.Printf("Can't read from DB routing/pastebin.go")
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	outData := Util.DataResponse{pasteData}
+	outJSON, err := json.Marshal(outData)
+	if err != nil {
+		log.Printf("Can't Marshall to JSON in routing/pastebin.go")
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(outJSON)
 }
 
 // CheckDuplicateURL returns whether the current URL is taken or not
@@ -102,14 +123,12 @@ func CheckDuplicateURL(url string) (bool, error) {
 	}
 
 	query := "SELECT * FROM pastes WHERE pastepath = '" + url + "'"
-
 	rows, err := dbConn.Query(query)
 	if err != nil {
 		return false, err
 	}
 
 	data := make([]string, 0)
-
 	for rows.Next() {
 		var expiration_length_in_min, created_at, pastepath, pastedata string
 		if err := rows.Scan(&expiration_length_in_min, &created_at, &pastepath, &pastedata); err != nil {
@@ -117,11 +136,9 @@ func CheckDuplicateURL(url string) (bool, error) {
 		}
 		data = append(data, expiration_length_in_min)
 	}
-
 	if err := rows.Err(); err != nil {
 		return false, err
 	}
-
 	if err != nil || len(data) == 0 {
 		return false, err
 	}
